@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
-import { ActionButton } from "@/components/ui/action-button";
+
+import { getCurrentUser } from "@/lib/session";
 import { deleteProjectAction } from "@/actions/projects";
+import { getProjectById } from "@/dal/projects/queries";
+import { ActionButton } from "@/components/ui/action-button";
+import { ProjectForm } from "@/components/project-form";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,18 +15,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getProjectById } from "@/dal/projects/queries";
-import { ProjectForm } from "@/components/project-form";
 
 export default async function EditProjectPage({
   params,
 }: PageProps<"/projects/[projectId]/edit">) {
-  const { projectId } = await params;
+  // AUTH_CHECK:
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") {
+    redirect("/");
+  }
 
-  const project = await getProjectById(projectId);
+  const { projectId } = await params;
+  const project = await getProjectById(user, projectId);
   if (project == null) return notFound();
-  // FIX: Not checking permissions
-  // FIX: Not checking if user has access to project
 
   return (
     <div className="space-y-6">
@@ -42,7 +47,6 @@ export default async function EditProjectPage({
       <div className="max-w-2xl space-y-6">
         <ProjectForm project={project} />
 
-        {/* FIX: Missing permission check */}
         <Card className="border-destructive">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>

@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FolderIcon, PlusIcon } from "lucide-react";
+
+import type { Project, User } from "@/drizzle/schema";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -13,16 +17,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Project, User } from "@/drizzle/schema";
 
-type AppSidebarProps = {
-  projects: Pick<Project, "id" | "name" | "department">[];
-  user: Pick<User, "role"> | null;
-};
-
-export function AppSidebar({ projects, user }: AppSidebarProps) {
+export function AppSidebar({
+  user,
+  projects,
+}: {
+  user: User;
+  projects: Project[];
+}) {
   const pathname = usePathname();
 
   return (
@@ -31,12 +33,11 @@ export function AppSidebar({ projects, user }: AppSidebarProps) {
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center justify-between">
             Projects
-            {/* PERMISSION: */}
-            {user?.role === "admin" && (
+            {/* AUTH_CHECK: */}
+            {user.role === "admin" && (
               <Button variant="ghost" size="icon-xs" asChild>
                 <Link href="/projects/new">
                   <PlusIcon className="size-4" />
-                  <span className="sr-only">New Project</span>
                 </Link>
               </Button>
             )}

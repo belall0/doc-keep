@@ -13,7 +13,6 @@ import {
 } from "@/dal/projects/mutations";
 import type { User } from "@/drizzle/schema";
 
-// DONE:
 export async function createProjectAction(data: ProjectFormValues) {
   // AUTH_CHECK:
   const user: User | null = await getCurrentUser();
@@ -41,7 +40,6 @@ export async function createProjectAction(data: ProjectFormValues) {
   return redirect(`/projects/${project.id}`);
 }
 
-// DONE:
 export async function updateProjectAction(
   projectId: string,
   data: ProjectFormValues,
@@ -66,7 +64,6 @@ export async function updateProjectAction(
   return redirect(`/projects/${projectId}`);
 }
 
-// DONE:
 export async function deleteProjectAction(projectId: string) {
   // AUTH_CHECK:
   const user: User | null = await getCurrentUser();
