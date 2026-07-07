@@ -1,13 +1,12 @@
-import { db } from "@/drizzle/db";
-import { ProjectInsertData, ProjectTable } from "@/drizzle/schema";
-import { AuthorizationError } from "@/lib/errors";
-import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 
-export async function createProject(data: ProjectInsertData) {
-  // PERMISSION:
-  const user = await getCurrentUser();
-  if (user == null || user.role !== "admin") {
+import { db } from "@/drizzle/db";
+import { ProjectInsertData, ProjectTable, User } from "@/drizzle/schema";
+import { AuthorizationError } from "@/lib/errors";
+
+export async function createProject(user: User, data: ProjectInsertData) {
+  // AUTH_CHECK:
+  if (user.role !== "admin") {
     throw new AuthorizationError();
   }
 
@@ -20,22 +19,21 @@ export async function createProject(data: ProjectInsertData) {
 }
 
 export async function updateProject(
+  user: User,
   projectId: string,
   data: Partial<ProjectInsertData>,
 ) {
-  // PERMISSION:
-  const user = await getCurrentUser();
-  if (user == null || user.role !== "admin") {
+  // AUTH_CHECK:
+  if (user.role !== "admin") {
     throw new AuthorizationError();
   }
 
   await db.update(ProjectTable).set(data).where(eq(ProjectTable.id, projectId));
 }
 
-export async function deleteProject(projectId: string) {
-  // PERMISSION:
-  const user = await getCurrentUser();
-  if (user == null || user.role !== "admin") {
+export async function deleteProject(user: User, projectId: string) {
+  // AUTH_CHECK:
+  if (user.role !== "admin") {
     throw new AuthorizationError();
   }
 
