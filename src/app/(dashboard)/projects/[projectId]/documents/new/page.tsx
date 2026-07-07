@@ -1,16 +1,22 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon } from "lucide-react";
 import { getProjectById } from "@/dal/projects/queries";
 import { DocumentForm } from "@/components/document-form";
+import { getCurrentUser } from "@/lib/session";
 
 export default async function NewDocumentPage({
   params,
 }: PageProps<"/projects/[projectId]/documents/new">) {
   const { projectId } = await params;
 
-  const project = await getProjectById(projectId);
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/");
+  }
+  const project = await getProjectById(user, projectId);
+
   if (project == null) return notFound();
   // FIX: Not checking permissions
   // FIX: Not checking if user has access to project

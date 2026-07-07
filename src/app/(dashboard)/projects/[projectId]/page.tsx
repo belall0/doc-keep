@@ -19,12 +19,17 @@ export default async function ProjectDocumentsPage({
   params,
 }: PageProps<"/projects/[projectId]">) {
   const { projectId } = await params;
-  const project = await getProjectById(projectId);
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/");
+  }
+
+  const project = await getProjectById(user, projectId);
   if (project == null) return notFound();
   // FIX: Not checking if user has access to project
 
   const documents = await getProjectDocuments(projectId);
-  const user = await getCurrentUser();
 
   return (
     <div className="space-y-6">
