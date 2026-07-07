@@ -1,27 +1,33 @@
 "use server";
 
-import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { documentSchema, type DocumentFormValues } from "../dtos/documents";
+
+import { getCurrentUser } from "@/lib/session";
+import { documentSchema, type DocumentFormValues } from "@/dtos/documents";
+import { tryFn } from "@/lib/helpers";
 import {
   createDocument,
   deleteDocument,
   updateDocument,
 } from "@/dal/documents/mutations";
-import { tryFn } from "@/lib/helpers";
 
 export async function createDocumentAction(
   projectId: string,
   data: DocumentFormValues,
 ) {
+  // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (user == null) return { message: "Not authenticated" };
+  if (!user) {
+    return { message: "Not authenticated" };
+  }
 
   const result = documentSchema.safeParse(data);
-  if (!result.success) return { message: "Invalid data" };
+  if (!result.success) {
+    return { message: "Invalid data" };
+  }
 
   const [error, document] = await tryFn(() =>
-    createDocument({
+    createDocument(user, {
       ...result.data,
       projectId,
       creatorId: user.id,
@@ -29,7 +35,9 @@ export async function createDocumentAction(
     }),
   );
 
-  if (error) return error;
+  if (error) {
+    return error;
+  }
 
   redirect(`/projects/${projectId}/documents/${document.id}`);
 }
@@ -39,20 +47,25 @@ export async function updateDocumentAction(
   projectId: string,
   data: DocumentFormValues,
 ) {
+  // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (user == null) return { message: "Not authenticated" };
+  if (!user) {
+    return { message: "Not authenticated" };
+  }
 
   const result = documentSchema.safeParse(data);
   if (!result.success) return { message: "Invalid data" };
 
   const [error] = await tryFn(() =>
-    updateDocument(documentId, {
+    updateDocument(user, documentId, {
       ...result.data,
       lastEditedById: user.id,
     }),
   );
 
-  if (error) return error;
+  if (error) {
+    return error;
+  }
 
   redirect(`/projects/${projectId}/documents/${documentId}`);
 }
@@ -61,7 +74,13 @@ export async function deleteDocumentAction(
   documentId: string,
   projectId: string,
 ) {
-  const [error] = await tryFn(() => deleteDocument(documentId));
+  // AUTH_CHECK:
+  const user = await getCurrentUser();
+  if (!user) {
+    return { message: "Not authenticated" };
+  }
+
+  const [error] = await tryFn(() => deleteDocument(user, documentId));
 
   if (error) return error;
 

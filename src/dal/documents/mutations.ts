@@ -1,14 +1,19 @@
-import { db } from "@/drizzle/db";
-import { DocumentInsertData, DocumentTable } from "@/drizzle/schema";
-import { AuthorizationError } from "@/lib/errors";
-import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 
-export async function createDocument(data: DocumentInsertData) {
-  // PERMISSION:
-  const user = await getCurrentUser();
-  // FIX: Missing viewer role check
-  if (user == null || user.role === "editor") {
+import { db } from "@/drizzle/db";
+import { DocumentInsertData, DocumentTable, type User } from "@/drizzle/schema";
+import { AuthorizationError } from "@/lib/errors";
+import { getProjectById } from "@/dal/projects/queries";
+
+export async function createDocument(user: User, data: DocumentInsertData) {
+  // AUTH_CHECK:
+  if (user.role !== "admin" && user.role !== "author") {
+    throw new AuthorizationError();
+  }
+
+  // AUTH_CHECK:
+  const project = await getProjectById(user, data.projectId);
+  if (project == null) {
     throw new AuthorizationError();
   }
 
@@ -21,12 +26,30 @@ export async function createDocument(data: DocumentInsertData) {
 }
 
 export async function updateDocument(
+  user: User,
   documentId: string,
   data: Partial<DocumentInsertData>,
 ) {
-  // PERMISSION:
-  const user = await getCurrentUser();
-  if (user == null || user.role === "viewer") {
+  // AUTH_CHECK:
+  if (
+    user.role !== "admin" &&
+    user.role !== "author" &&
+    user.role !== "editor"
+  ) {
+    throw new AuthorizationError();
+  }
+
+  // fetch the document to get its projectId
+  const document = await db.query.DocumentTable.findFirst({
+    where: eq(DocumentTable.id, documentId),
+  });
+  if (document == null) {
+    throw new Error("Document not found");
+  }
+
+  // AUTH_CHECK:
+  const project = await getProjectById(user, document.projectId);
+  if (project == null) {
     throw new AuthorizationError();
   }
 
@@ -36,10 +59,9 @@ export async function updateDocument(
     .where(eq(DocumentTable.id, documentId));
 }
 
-export async function deleteDocument(documentId: string) {
-  // PERMISSION:
-  const user = await getCurrentUser();
-  if (user == null || user.role !== "admin") {
+export async function deleteDocument(user: User, documentId: string) {
+  // AUTH_CHECK:
+  if (user.role !== "admin") {
     throw new AuthorizationError();
   }
 
