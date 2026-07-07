@@ -1,27 +1,27 @@
+import { and, eq, isNull, or } from "drizzle-orm";
+
 import { db } from "@/drizzle/db";
 import { ProjectTable, User } from "@/drizzle/schema";
-import { AuthorizationError } from "@/lib/errors";
-import { getCurrentUser } from "@/lib/session";
-import { eq, isNull, or } from "drizzle-orm";
 
-export async function getAllProjects({ ordered } = { ordered: false }) {
-  // PERMISSION:
-  const user = await getCurrentUser();
-  if (user == null) throw new AuthorizationError();
-
+// AUTH_CHECK:
+export async function getAllProjects(
+  user: User,
+  { ordered } = { ordered: false },
+) {
   return db.query.ProjectTable.findMany({
     where: userWhereClause(user),
     orderBy: ordered ? ProjectTable.name : undefined,
   });
 }
 
-export async function getProjectById(id: string) {
+// AUTH_CHECK:
+export async function getProjectById(user: User, id: string) {
   return db.query.ProjectTable.findFirst({
-    where: eq(ProjectTable.id, id),
+    where: and(eq(ProjectTable.id, id), userWhereClause(user)),
   });
 }
 
-// PERMISSION:
+// AUTH_CHECK:
 function userWhereClause(user: Pick<User, "role" | "department">) {
   const role = user.role;
   switch (role) {
@@ -33,7 +33,7 @@ function userWhereClause(user: Pick<User, "role" | "department">) {
         isNull(ProjectTable.department),
       );
     case "admin":
-      return undefined;
+      return undefined; // no filter — admins see all projects
     default:
       throw new Error(`Unhandled user role: ${role satisfies never}`);
   }
