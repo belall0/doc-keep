@@ -19,17 +19,15 @@ export default async function ProjectDocumentsPage({
   params,
 }: PageProps<"/projects/[projectId]">) {
   const { projectId } = await params;
+  // AUTH_CHECK:
   const user = await getCurrentUser();
+  if (!user) redirect("/");
 
-  if (!user) {
-    redirect("/");
-  }
-
+  // AUTH_CHECK:
   const project = await getProjectById(user, projectId);
-  if (project == null) return notFound();
-  // FIX: Not checking if user has access to project
+  if (!project) return notFound();
 
-  const documents = await getProjectDocuments(projectId);
+  const documents = (await getProjectDocuments(user, projectId)) ?? [];
 
   return (
     <div className="space-y-6">
@@ -41,15 +39,15 @@ export default async function ProjectDocumentsPage({
           )}
         </div>
         <div className="flex gap-2">
-          {/* PERMISSION: */}
-          {user?.role === "admin" && (
+          {/* AUTH_CHECK: */}
+          {user.role === "admin" && (
             <Button asChild variant="outline">
               <Link href={`/projects/${projectId}/edit`}>Edit Project</Link>
             </Button>
           )}
-          {/* PERMISSION: */}
-          {/* FIX: Missing admin role check */}
-          {user?.role === "author" && (
+
+          {/* AUTH_CHECK: */}
+          {(user.role === "author" || user.role === "admin") && (
             <Button asChild>
               <Link href={`/projects/${projectId}/documents/new`}>
                 <PlusIcon className="size-4" />
@@ -68,13 +66,16 @@ export default async function ProjectDocumentsPage({
             <p className="text-muted-foreground mb-4">
               Create your first document in this project.
             </p>
-            {/* FIX: Missing permission check */}
-            <Button asChild>
-              <Link href={`/projects/${projectId}/documents/new`}>
-                <PlusIcon className="size-4 mr-2" />
-                New Document
-              </Link>
-            </Button>
+
+            {/* AUTH_CHECK: */}
+            {(user.role === "author" || user.role === "admin") && (
+              <Button asChild>
+                <Link href={`/projects/${projectId}/documents/new`}>
+                  <PlusIcon className="size-4" />
+                  New Document
+                </Link>
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (

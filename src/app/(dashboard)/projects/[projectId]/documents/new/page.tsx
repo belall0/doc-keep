@@ -11,15 +11,12 @@ export default async function NewDocumentPage({
 }: PageProps<"/projects/[projectId]/documents/new">) {
   const { projectId } = await params;
 
+  // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user) {
-    redirect("/");
-  }
-  const project = await getProjectById(user, projectId);
+  if (!user || (user.role !== "admin" && user.role !== "author")) redirect("/");
 
-  if (project == null) return notFound();
-  // FIX: Not checking permissions
-  // FIX: Not checking if user has access to project
+  const project = await getProjectById(user, projectId);
+  if (!project) return notFound();
 
   return (
     <div className="space-y-6">

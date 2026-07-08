@@ -10,19 +10,17 @@ import { getCurrentUser } from "@/lib/session";
 export default async function EditDocumentPage({
   params,
 }: PageProps<"/projects/[projectId]/documents/[documentId]/edit">) {
+  // AUTH_CHECK:
+  const user = await getCurrentUser();
+  if (!user || user.role === "viewer") redirect("/");
+
   const { projectId, documentId } = await params;
 
-  const document = await getDocumentById(documentId);
-  if (document == null) return notFound();
+  const document = await getDocumentById(user, documentId);
+  if (!document) return notFound();
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect("/");
-  }
   const project = await getProjectById(user, projectId);
-  if (project == null) return notFound();
-  // FIX: Not checking permissions
-  // FIX: Not checking if user has access to project
+  if (!project) return notFound();
 
   return (
     <div className="space-y-6">

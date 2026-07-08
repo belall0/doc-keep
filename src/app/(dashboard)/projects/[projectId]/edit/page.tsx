@@ -21,9 +21,7 @@ export default async function EditProjectPage({
 }: PageProps<"/projects/[projectId]/edit">) {
   // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
-    redirect("/");
-  }
+  if (!user || user.role !== "admin") redirect("/");
 
   const { projectId } = await params;
   const project = await getProjectById(user, projectId);

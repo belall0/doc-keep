@@ -18,9 +18,7 @@ import {
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
   // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user) {
-    redirect("/");
-  }
+  if (!user) redirect("/");
 
   const projects = await getAllProjects(user, { ordered: true });
 

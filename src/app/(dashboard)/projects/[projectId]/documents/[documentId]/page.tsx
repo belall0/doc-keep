@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,13 @@ import { getCurrentUser } from "@/lib/session";
 export default async function DocumentDetailPage({
   params,
 }: PageProps<"/projects/[projectId]/documents/[documentId]">) {
-  const { projectId, documentId } = await params;
-  // FIX: Not checking permissions
-  // FIX: Not checking if user has access to project
-
-  const document = await getDocumentWithUserInfo(documentId);
-  if (document == null) return notFound();
-
+  // AUTH_CHECK:
   const user = await getCurrentUser();
+  if (!user) redirect("/");
+
+  const { projectId, documentId } = await params;
+  const document = await getDocumentWithUserInfo(user, documentId);
+  if (!document) return notFound();
 
   return (
     <div className="space-y-6">
@@ -46,10 +45,10 @@ export default async function DocumentDetailPage({
           </div>
         </div>
         <div className="flex gap-2">
-          {/* PERMISSION: */}
-          {(user?.role === "author" ||
-            user?.role === "editor" ||
-            user?.role === "admin") && (
+          {/* AUTH_CHECK: */}
+          {(user.role === "author" ||
+            user.role === "editor" ||
+            user.role === "admin") && (
             <Button variant="outline" asChild>
               <Link
                 href={`/projects/${projectId}/documents/${documentId}/edit`}
@@ -59,8 +58,8 @@ export default async function DocumentDetailPage({
               </Link>
             </Button>
           )}
-          {/* PERMISSION: */}
-          {user?.role === "admin" && (
+          {/* AUTH_CHECK: */}
+          {user.role === "admin" && (
             <ActionButton
               variant="destructive"
               requireAreYouSure
