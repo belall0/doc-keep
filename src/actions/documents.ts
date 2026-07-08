@@ -17,14 +17,10 @@ export async function createDocumentAction(
 ) {
   // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user) {
-    return { message: "Not authenticated" };
-  }
+  if (!user) return { message: "Not authenticated" };
 
   const result = documentSchema.safeParse(data);
-  if (!result.success) {
-    return { message: "Invalid data" };
-  }
+  if (!result.success) return { message: "Invalid data" };
 
   const [error, document] = await tryFn(() =>
     createDocument(user, {
@@ -35,9 +31,7 @@ export async function createDocumentAction(
     }),
   );
 
-  if (error) {
-    return error;
-  }
+  if (error) return error;
 
   redirect(`/projects/${projectId}/documents/${document.id}`);
 }
@@ -49,9 +43,7 @@ export async function updateDocumentAction(
 ) {
   // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user) {
-    return { message: "Not authenticated" };
-  }
+  if (!user) return { message: "Not authenticated" };
 
   const result = documentSchema.safeParse(data);
   if (!result.success) return { message: "Invalid data" };
@@ -63,9 +55,7 @@ export async function updateDocumentAction(
     }),
   );
 
-  if (error) {
-    return error;
-  }
+  if (error) return error;
 
   redirect(`/projects/${projectId}/documents/${documentId}`);
 }
@@ -76,9 +66,7 @@ export async function deleteDocumentAction(
 ) {
   // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user) {
-    return { message: "Not authenticated" };
-  }
+  if (!user) return { message: "Not authenticated" };
 
   const [error] = await tryFn(() => deleteDocument(user, documentId));
 

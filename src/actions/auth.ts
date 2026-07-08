@@ -8,14 +8,10 @@ import { getUserByEmail } from "@/dal/users/queries";
 
 export async function login(data: LoginFormValues) {
   const result = loginSchema.safeParse(data);
-  if (!result.success) {
-    return { message: "Invalid data" };
-  }
+  if (!result.success) return { message: "Invalid data" };
 
   const user = await getUserByEmail(result.data.email);
-  if (user == null) {
-    return { message: "User not found" };
-  }
+  if (!user) return { message: "User not found" };
 
   await setSession(user.id);
   return redirect("/projects");

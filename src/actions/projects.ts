@@ -16,14 +16,10 @@ import type { User } from "@/drizzle/schema";
 export async function createProjectAction(data: ProjectFormValues) {
   // AUTH_CHECK:
   const user: User | null = await getCurrentUser();
-  if (!user) {
-    return { message: "Not authenticated" };
-  }
+  if (!user) return { message: "Not authenticated" };
 
   const result = projectSchema.safeParse(data);
-  if (!result.success) {
-    return { message: "Invalid data" };
-  }
+  if (!result.success) return { message: "Invalid data" };
 
   const [error, project] = await tryFn(() =>
     createProject(user, {
@@ -32,9 +28,7 @@ export async function createProjectAction(data: ProjectFormValues) {
       department: result.data.department || null,
     }),
   );
-  if (error) {
-    return error;
-  }
+  if (error) return error;
 
   revalidatePath(`/projects/${project.id}`);
   return redirect(`/projects/${project.id}`);
@@ -46,9 +40,7 @@ export async function updateProjectAction(
 ) {
   // AUTH_CHECK:
   const user: User | null = await getCurrentUser();
-  if (!user) {
-    return { message: "Not authenticated" };
-  }
+  if (!user) return { message: "Not authenticated" };
 
   const result = projectSchema.safeParse(data);
   if (!result.success) return { message: "Invalid data" };
@@ -56,9 +48,7 @@ export async function updateProjectAction(
   const [error] = await tryFn(() =>
     updateProject(user, projectId, result.data),
   );
-  if (error) {
-    return error;
-  }
+  if (error) return error;
 
   revalidatePath(`/projects/${projectId}`);
   return redirect(`/projects/${projectId}`);
@@ -67,14 +57,10 @@ export async function updateProjectAction(
 export async function deleteProjectAction(projectId: string) {
   // AUTH_CHECK:
   const user: User | null = await getCurrentUser();
-  if (!user) {
-    return { message: "Not authenticated" };
-  }
+  if (!user) return { message: "Not authenticated" };
 
   const [error] = await tryFn(() => deleteProject(user, projectId));
-  if (error) {
-    return error;
-  }
+  if (error) return error;
 
   return redirect("/projects");
 }
