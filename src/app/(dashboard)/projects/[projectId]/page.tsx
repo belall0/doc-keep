@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ export default async function ProjectDocumentsPage({
 
   // AUTH_CHECK:
   const project = await getProjectById(user, projectId);
-  if (!project) return notFound();
+  if (!project) redirect("/");
 
   const documents = (await getProjectDocuments(user, projectId)) ?? [];
 

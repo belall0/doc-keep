@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,10 @@ export default async function DocumentDetailPage({
   const user = await getCurrentUser();
   if (!user) redirect("/");
 
+  // AUTH_CHECK:
   const { projectId, documentId } = await params;
   const document = await getDocumentWithUserInfo(user, documentId);
-  if (!document) return notFound();
+  if (!document) redirect("/");
 
   return (
     <div className="space-y-6">
