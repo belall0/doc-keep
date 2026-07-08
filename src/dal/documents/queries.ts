@@ -7,23 +7,19 @@ export async function getDocumentById(user: User, documentId: string) {
   const document = await db.query.DocumentTable.findFirst({
     where: eq(DocumentTable.id, documentId),
   });
-  if (!document) {
-    return null;
-  }
+  if (!document) return null;
 
   // AUTH_CHECK:
   const project = await getProjectById(user, document.projectId);
-  if (project == null) return null;
+  if (!project) return null;
 
   return document;
 }
 
 export async function getProjectDocuments(user: User, projectId: string) {
-  // AUTH_CHECK: verify user has access to the project before fetching its documents
+  // AUTH_CHECK:
   const project = await getProjectById(user, projectId);
-  if (project == null) {
-    return null;
-  }
+  if (!project) return null;
 
   return db
     .select({
@@ -45,10 +41,8 @@ export async function getProjectDocuments(user: User, projectId: string) {
 
 export async function getDocumentWithUserInfo(user: User, documentId: string) {
   // AUTH_CHECK:
-  const access = await getDocumentById(user, documentId);
-  if (access == null) {
-    return null;
-  }
+  const hasAccess = await getDocumentById(user, documentId);
+  if (!hasAccess) return null;
 
   return db.query.DocumentTable.findFirst({
     where: eq(DocumentTable.id, documentId),

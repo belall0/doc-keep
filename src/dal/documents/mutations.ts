@@ -7,15 +7,11 @@ import { getProjectById } from "@/dal/projects/queries";
 
 export async function createDocument(user: User, data: DocumentInsertData) {
   // AUTH_CHECK:
-  if (user.role !== "admin" && user.role !== "author") {
+  if (user.role !== "admin" && user.role !== "author")
     throw new AuthorizationError();
-  }
 
-  // AUTH_CHECK:
   const project = await getProjectById(user, data.projectId);
-  if (project == null) {
-    throw new AuthorizationError();
-  }
+  if (!project) throw new AuthorizationError();
 
   const [document] = await db
     .insert(DocumentTable)
@@ -31,39 +27,29 @@ export async function updateDocument(
   data: Partial<DocumentInsertData>,
 ) {
   // AUTH_CHECK:
-  if (
-    user.role !== "admin" &&
-    user.role !== "author" &&
-    user.role !== "editor"
-  ) {
-    throw new AuthorizationError();
-  }
+  if (user.role === "viewer") throw new AuthorizationError();
 
-  // fetch the document to get its projectId
   const document = await db.query.DocumentTable.findFirst({
     where: eq(DocumentTable.id, documentId),
   });
-  if (document == null) {
-    throw new Error("Document not found");
-  }
+  if (!document) throw new Error("Document not found");
 
   // AUTH_CHECK:
   const project = await getProjectById(user, document.projectId);
-  if (project == null) {
-    throw new AuthorizationError();
-  }
+  if (!project) throw new AuthorizationError();
 
-  await db
+  const [updatedDocument] = await db
     .update(DocumentTable)
     .set(data)
-    .where(eq(DocumentTable.id, documentId));
+    .where(eq(DocumentTable.id, documentId))
+    .returning();
+
+  return updatedDocument;
 }
 
 export async function deleteDocument(user: User, documentId: string) {
   // AUTH_CHECK:
-  if (user.role !== "admin") {
-    throw new AuthorizationError();
-  }
+  if (user.role !== "admin") throw new AuthorizationError();
 
   await db.delete(DocumentTable).where(eq(DocumentTable.id, documentId));
 }

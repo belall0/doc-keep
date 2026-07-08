@@ -3,7 +3,6 @@ import { and, eq, isNull, or } from "drizzle-orm";
 import { db } from "@/drizzle/db";
 import { ProjectTable, User } from "@/drizzle/schema";
 
-// AUTH_CHECK:
 export async function getAllProjects(
   user: User,
   { ordered } = { ordered: false },
@@ -14,16 +13,16 @@ export async function getAllProjects(
   });
 }
 
-// AUTH_CHECK:
-export async function getProjectById(user: User, id: string) {
+export async function getProjectById(user: User, projectId: string) {
   return db.query.ProjectTable.findFirst({
-    where: and(eq(ProjectTable.id, id), userWhereClause(user)),
+    where: and(eq(ProjectTable.id, projectId), userWhereClause(user)),
   });
 }
 
 // AUTH_CHECK:
 function userWhereClause(user: Pick<User, "role" | "department">) {
   const role = user.role;
+
   switch (role) {
     case "author":
     case "viewer":
@@ -33,7 +32,7 @@ function userWhereClause(user: Pick<User, "role" | "department">) {
         isNull(ProjectTable.department),
       );
     case "admin":
-      return undefined; // no filter — admins see all projects
+      return undefined;
     default:
       throw new Error(`Unhandled user role: ${role satisfies never}`);
   }

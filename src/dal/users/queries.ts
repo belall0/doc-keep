@@ -13,8 +13,8 @@ export async function getUserByEmail(email: string) {
   });
 }
 
-export async function getUserById(id: string) {
+export async function getUserById(userId: string) {
   return db.query.UserTable.findFirst({
-    where: eq(UserTable.id, id),
+    where: eq(UserTable.id, userId),
   });
 }
