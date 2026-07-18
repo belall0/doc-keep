@@ -44,26 +44,3 @@ Documents are the core content of the application.
 | `lastEditedById` | The user who last modified the document     |
 
 ---
-
-## Permission Matrix
-
-### Projects
-
-| Role       | View | Create | Edit | Delete |
-| :--------- | :--: | :----: | :--: | :----: |
-| **Viewer** |  ✅  |   ❌   |  ❌  |   ❌   |
-| **Editor** |  ✅  |   ❌   |  ❌  |   ❌   |
-| **Author** |  ✅  |   ❌   |  ❌  |   ❌   |
-| **Admin**  |  ✅  |   ✅   |  ✅  |   ✅   |
-
-> [!IMPORTANT]
-> **Department Restriction:** All roles other than **Admin** can only access projects with a department that matches their own department, or projects with a `null` department (cross-department projects).
-
-### Documents
-
-| Role       | View | Create | Edit | Delete |
-| :--------- | :--: | :----: | :--: | :----: |
-| **Viewer** |  ✅  |   ❌   |  ❌  |   ❌   |
-| **Editor** |  ✅  |   ❌   |  ✅  |   ❌   |
-| **Author** |  ✅  |   ✅   |  ✅  |   ❌   |
-| **Admin**  |  ✅  |   ✅   |  ✅  |   ✅   |
