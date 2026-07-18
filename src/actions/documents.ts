@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-
 import { getCurrentUser } from "@/lib/session";
 import { documentSchema, type DocumentFormValues } from "@/dtos/documents";
 import { tryFn } from "@/lib/helpers";
@@ -15,7 +14,6 @@ export async function createDocumentAction(
   projectId: string,
   data: DocumentFormValues,
 ) {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
   if (!user) return { message: "Not authenticated" };
 
@@ -23,7 +21,7 @@ export async function createDocumentAction(
   if (!result.success) return { message: "Invalid data" };
 
   const [error, document] = await tryFn(() =>
-    createDocument(user, {
+    createDocument({
       ...result.data,
       projectId,
       creatorId: user.id,
@@ -41,7 +39,6 @@ export async function updateDocumentAction(
   projectId: string,
   data: DocumentFormValues,
 ) {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
   if (!user) return { message: "Not authenticated" };
 
@@ -49,7 +46,7 @@ export async function updateDocumentAction(
   if (!result.success) return { message: "Invalid data" };
 
   const [error] = await tryFn(() =>
-    updateDocument(user, documentId, {
+    updateDocument(documentId, {
       ...result.data,
       lastEditedById: user.id,
     }),
@@ -64,11 +61,10 @@ export async function deleteDocumentAction(
   documentId: string,
   projectId: string,
 ) {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
   if (!user) return { message: "Not authenticated" };
 
-  const [error] = await tryFn(() => deleteDocument(user, documentId));
+  const [error] = await tryFn(() => deleteDocument(documentId));
 
   if (error) return error;
 

@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-
 import { getCurrentUser } from "@/lib/session";
 import { projectSchema, type ProjectFormValues } from "@/dtos/projects";
 import { tryFn } from "@/lib/helpers";
@@ -11,23 +10,22 @@ import {
   deleteProject,
   updateProject,
 } from "@/dal/projects/mutations";
-import type { User } from "@/drizzle/schema";
 
 export async function createProjectAction(data: ProjectFormValues) {
-  // AUTH_CHECK:
-  const user: User | null = await getCurrentUser();
+  const user = await getCurrentUser();
   if (!user) return { message: "Not authenticated" };
 
   const result = projectSchema.safeParse(data);
   if (!result.success) return { message: "Invalid data" };
 
   const [error, project] = await tryFn(() =>
-    createProject(user, {
+    createProject({
       ...result.data,
       ownerId: user.id,
       department: result.data.department || null,
     }),
   );
+
   if (error) return error;
 
   revalidatePath(`/projects/${project.id}`);
@@ -38,16 +36,14 @@ export async function updateProjectAction(
   projectId: string,
   data: ProjectFormValues,
 ) {
-  // AUTH_CHECK:
-  const user: User | null = await getCurrentUser();
+  const user = await getCurrentUser();
   if (!user) return { message: "Not authenticated" };
 
   const result = projectSchema.safeParse(data);
   if (!result.success) return { message: "Invalid data" };
 
-  const [error] = await tryFn(() =>
-    updateProject(user, projectId, result.data),
-  );
+  const [error] = await tryFn(() => updateProject(projectId, result.data));
+
   if (error) return error;
 
   revalidatePath(`/projects/${projectId}`);
@@ -55,11 +51,11 @@ export async function updateProjectAction(
 }
 
 export async function deleteProjectAction(projectId: string) {
-  // AUTH_CHECK:
-  const user: User | null = await getCurrentUser();
+  const user = await getCurrentUser();
   if (!user) return { message: "Not authenticated" };
 
-  const [error] = await tryFn(() => deleteProject(user, projectId));
+  const [error] = await tryFn(() => deleteProject(projectId));
+
   if (error) return error;
 
   return redirect("/projects");

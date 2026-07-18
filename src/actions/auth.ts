@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-
 import { setSession, clearSession } from "@/lib/session";
 import { loginSchema, type LoginFormValues } from "@/dtos/auth";
 import { getUserByEmail } from "@/dal/users/queries";
