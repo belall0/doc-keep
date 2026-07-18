@@ -1,13 +1,8 @@
 import { eq } from "drizzle-orm";
-
 import { db } from "@/drizzle/db";
-import { ProjectInsertData, ProjectTable, User } from "@/drizzle/schema";
-import { AuthorizationError } from "@/lib/errors";
+import { ProjectInsertData, ProjectTable } from "@/drizzle/schema";
 
-export async function createProject(user: User, data: ProjectInsertData) {
-  // AUTH_CHECK:
-  if (user.role !== "admin") throw new AuthorizationError();
-
+export async function createProject(data: ProjectInsertData) {
   const [project] = await db
     .insert(ProjectTable)
     .values(data)
@@ -17,13 +12,9 @@ export async function createProject(user: User, data: ProjectInsertData) {
 }
 
 export async function updateProject(
-  user: User,
   projectId: string,
   data: Partial<ProjectInsertData>,
 ) {
-  // AUTH_CHECK:
-  if (user.role !== "admin") throw new AuthorizationError();
-
   const [updatedProject] = await db
     .update(ProjectTable)
     .set(data)
@@ -35,9 +26,6 @@ export async function updateProject(
   return updatedProject;
 }
 
-export async function deleteProject(user: User, projectId: string) {
-  // AUTH_CHECK:
-  if (user.role !== "admin") throw new AuthorizationError();
-
+export async function deleteProject(projectId: string) {
   await db.delete(ProjectTable).where(eq(ProjectTable.id, projectId));
 }

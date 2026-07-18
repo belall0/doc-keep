@@ -1,26 +1,15 @@
-import { db } from "@/drizzle/db";
-import { DocumentTable, User, UserTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-import { getProjectById } from "../projects/queries";
+import { db } from "@/drizzle/db";
+import { DocumentTable, UserTable } from "@/drizzle/schema";
 
-export async function getDocumentById(user: User, documentId: string) {
+export async function getDocumentById(documentId: string) {
   const document = await db.query.DocumentTable.findFirst({
     where: eq(DocumentTable.id, documentId),
   });
-  if (!document) return null;
-
-  // AUTH_CHECK:
-  const project = await getProjectById(user, document.projectId);
-  if (!project) return null;
-
-  return document;
+  return document ?? null;
 }
 
-export async function getProjectDocuments(user: User, projectId: string) {
-  // AUTH_CHECK:
-  const project = await getProjectById(user, projectId);
-  if (!project) return null;
-
+export async function getProjectDocuments(projectId: string) {
   return db
     .select({
       id: DocumentTable.id,
@@ -39,16 +28,13 @@ export async function getProjectDocuments(user: User, projectId: string) {
     .orderBy(DocumentTable.createdAt);
 }
 
-export async function getDocumentWithUserInfo(user: User, documentId: string) {
-  // AUTH_CHECK:
-  const hasAccess = await getDocumentById(user, documentId);
-  if (!hasAccess) return null;
-
-  return db.query.DocumentTable.findFirst({
+export async function getDocumentWithUserInfo(documentId: string) {
+  const document = await db.query.DocumentTable.findFirst({
     where: eq(DocumentTable.id, documentId),
     with: {
       creator: { columns: { name: true } },
       lastEditedBy: { columns: { name: true } },
     },
   });
+  return document ?? null;
 }
