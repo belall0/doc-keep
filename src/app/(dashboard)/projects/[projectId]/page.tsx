@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -19,15 +19,13 @@ export default async function ProjectDocumentsPage({
   params,
 }: PageProps<"/projects/[projectId]">) {
   const { projectId } = await params;
-  // AUTH_CHECK:
   const user = await getCurrentUser();
   if (!user) redirect("/");
 
-  // AUTH_CHECK:
-  const project = await getProjectById(user, projectId);
-  if (!project) redirect("/");
+  const project = await getProjectById(projectId);
+  if (!project) notFound();
 
-  const documents = (await getProjectDocuments(user, projectId)) ?? [];
+  const documents = (await getProjectDocuments(projectId)) ?? [];
 
   return (
     <div className="space-y-6">
@@ -39,22 +37,16 @@ export default async function ProjectDocumentsPage({
           )}
         </div>
         <div className="flex gap-2">
-          {/* AUTH_CHECK: */}
-          {user.role === "admin" && (
-            <Button asChild variant="outline">
-              <Link href={`/projects/${projectId}/edit`}>Edit Project</Link>
-            </Button>
-          )}
+          <Button asChild variant="outline">
+            <Link href={`/projects/${projectId}/edit`}>Edit Project</Link>
+          </Button>
 
-          {/* AUTH_CHECK: */}
-          {(user.role === "author" || user.role === "admin") && (
-            <Button asChild>
-              <Link href={`/projects/${projectId}/documents/new`}>
-                <PlusIcon className="size-4" />
-                New Document
-              </Link>
-            </Button>
-          )}
+          <Button asChild>
+            <Link href={`/projects/${projectId}/documents/new`}>
+              <PlusIcon className="size-4" />
+              New Document
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -67,15 +59,12 @@ export default async function ProjectDocumentsPage({
               Create your first document in this project.
             </p>
 
-            {/* AUTH_CHECK: */}
-            {(user.role === "author" || user.role === "admin") && (
-              <Button asChild>
-                <Link href={`/projects/${projectId}/documents/new`}>
-                  <PlusIcon className="size-4" />
-                  New Document
-                </Link>
-              </Button>
-            )}
+            <Button asChild>
+              <Link href={`/projects/${projectId}/documents/new`}>
+                <PlusIcon className="size-4" />
+                New Document
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       ) : (

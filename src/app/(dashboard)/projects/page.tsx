@@ -4,11 +4,10 @@ import { getAllProjects } from "@/dal/projects/queries";
 import { getCurrentUser } from "@/lib/session";
 
 export default async function ProjectsPage() {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
   if (!user) redirect("/");
 
-  const projects = await getAllProjects(user, { ordered: true });
+  const projects = await getAllProjects({ ordered: true });
 
   if (projects.length > 0) redirect(`/projects/${projects[0].id}`);
 

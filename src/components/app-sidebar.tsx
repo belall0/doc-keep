@@ -18,13 +18,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export function AppSidebar({
-  user,
-  projects,
-}: {
-  user: User;
-  projects: Project[];
-}) {
+export function AppSidebar({ projects }: { user: User; projects: Project[] }) {
   const pathname = usePathname();
 
   return (
@@ -33,14 +27,11 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center justify-between">
             Projects
-            {/* AUTH_CHECK: */}
-            {user.role === "admin" && (
-              <Button variant="ghost" size="icon-xs" asChild>
-                <Link href="/projects/new">
-                  <PlusIcon className="size-4" />
-                </Link>
-              </Button>
-            )}
+            <Button variant="ghost" size="icon-xs" asChild>
+              <Link href="/projects/new">
+                <PlusIcon className="size-4" />
+              </Link>
+            </Button>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

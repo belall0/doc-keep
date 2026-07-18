@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ProjectForm } from "@/components/project-form";
 
 export default async function NewProjectPage() {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") redirect("/");
+  if (!user) redirect("/");
 
   return (
     <div className="space-y-6">

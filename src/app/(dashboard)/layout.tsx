@@ -16,11 +16,10 @@ import {
 } from "@/components/ui/sidebar";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
   if (!user) redirect("/");
 
-  const projects = await getAllProjects(user, { ordered: true });
+  const projects = await getAllProjects({ ordered: true });
 
   return (
     <SidebarProvider>

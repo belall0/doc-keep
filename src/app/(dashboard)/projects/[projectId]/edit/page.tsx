@@ -19,12 +19,11 @@ import {
 export default async function EditProjectPage({
   params,
 }: PageProps<"/projects/[projectId]/edit">) {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") redirect("/");
+  if (!user) redirect("/");
 
   const { projectId } = await params;
-  const project = await getProjectById(user, projectId);
+  const project = await getProjectById(projectId);
   if (project == null) return notFound();
 
   return (

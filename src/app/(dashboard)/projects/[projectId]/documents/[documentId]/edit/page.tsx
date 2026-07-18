@@ -1,5 +1,5 @@
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon } from "lucide-react";
 import { getProjectById } from "@/dal/projects/queries";
@@ -10,18 +10,16 @@ import { getCurrentUser } from "@/lib/session";
 export default async function EditDocumentPage({
   params,
 }: PageProps<"/projects/[projectId]/documents/[documentId]/edit">) {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user || user.role === "viewer") redirect("/");
+  if (!user) redirect("/");
 
   const { projectId, documentId } = await params;
 
-  // AUTH_CHECK:
-  const document = await getDocumentById(user, documentId);
-  if (!document) redirect("/");
+  const document = await getDocumentById(documentId);
+  if (!document) notFound();
 
-  const project = await getProjectById(user, projectId);
-  if (!project) redirect("/");
+  const project = await getProjectById(projectId);
+  if (!project) notFound();
 
   return (
     <div className="space-y-6">

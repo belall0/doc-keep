@@ -11,11 +11,10 @@ export default async function NewDocumentPage({
 }: PageProps<"/projects/[projectId]/documents/new">) {
   const { projectId } = await params;
 
-  // AUTH_CHECK:
   const user = await getCurrentUser();
-  if (!user || (user.role !== "admin" && user.role !== "author")) redirect("/");
+  if (!user) redirect("/");
 
-  const project = await getProjectById(user, projectId);
+  const project = await getProjectById(projectId);
   if (!project) return notFound();
 
   return (

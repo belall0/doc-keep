@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,12 @@ import { getCurrentUser } from "@/lib/session";
 export default async function DocumentDetailPage({
   params,
 }: PageProps<"/projects/[projectId]/documents/[documentId]">) {
-  // AUTH_CHECK:
   const user = await getCurrentUser();
   if (!user) redirect("/");
 
-  // AUTH_CHECK:
   const { projectId, documentId } = await params;
-  const document = await getDocumentWithUserInfo(user, documentId);
-  if (!document) redirect("/");
+  const document = await getDocumentWithUserInfo(documentId);
+  if (!document) notFound();
 
   return (
     <div className="space-y-6">
@@ -46,30 +44,22 @@ export default async function DocumentDetailPage({
           </div>
         </div>
         <div className="flex gap-2">
-          {/* AUTH_CHECK: */}
-          {(user.role === "author" ||
-            user.role === "editor" ||
-            user.role === "admin") && (
-            <Button variant="outline" asChild>
-              <Link
-                href={`/projects/${projectId}/documents/${documentId}/edit`}
-              >
-                <PencilIcon className="size-4 mr-2" />
-                Edit
-              </Link>
-            </Button>
-          )}
-          {/* AUTH_CHECK: */}
-          {user.role === "admin" && (
-            <ActionButton
-              variant="destructive"
-              requireAreYouSure
-              areYouSureDescription="This will permanently delete this document. This action cannot be undone."
-              action={deleteDocumentAction.bind(null, documentId, projectId)}
+          <Button variant="outline" asChild>
+            <Link
+              href={`/projects/${projectId}/documents/${documentId}/edit`}
             >
-              Delete
-            </ActionButton>
-          )}
+              <PencilIcon className="size-4 mr-2" />
+              Edit
+            </Link>
+          </Button>
+          <ActionButton
+            variant="destructive"
+            requireAreYouSure
+            areYouSureDescription="This will permanently delete this document. This action cannot be undone."
+            action={deleteDocumentAction.bind(null, documentId, projectId)}
+          >
+            Delete
+          </ActionButton>
         </div>
       </div>
 
