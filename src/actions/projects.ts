@@ -2,29 +2,16 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { projectSchema, type ProjectFormValues } from "@/dtos/projects";
+import { type ProjectFormValues } from "@/dtos/projects";
 import { tryFn } from "@/lib/helpers";
 import {
-  createProject,
-  deleteProject,
-  updateProject,
-} from "@/dal/projects/mutations";
+  createProjectService,
+  deleteProjectService,
+  updateProjectService,
+} from "@/services/projects";
 
 export async function createProjectAction(data: ProjectFormValues) {
-  const user = await getCurrentUser();
-  if (!user) return { message: "Not authenticated" };
-
-  const result = projectSchema.safeParse(data);
-  if (!result.success) return { message: "Invalid data" };
-
-  const [error, project] = await tryFn(() =>
-    createProject({
-      ...result.data,
-      ownerId: user.id,
-      department: result.data.department || null,
-    }),
-  );
+  const [error, project] = await tryFn(() => createProjectService(data));
 
   if (error) return error;
 
@@ -36,13 +23,7 @@ export async function updateProjectAction(
   projectId: string,
   data: ProjectFormValues,
 ) {
-  const user = await getCurrentUser();
-  if (!user) return { message: "Not authenticated" };
-
-  const result = projectSchema.safeParse(data);
-  if (!result.success) return { message: "Invalid data" };
-
-  const [error] = await tryFn(() => updateProject(projectId, result.data));
+  const [error] = await tryFn(() => updateProjectService(projectId, data));
 
   if (error) return error;
 
@@ -51,10 +32,7 @@ export async function updateProjectAction(
 }
 
 export async function deleteProjectAction(projectId: string) {
-  const user = await getCurrentUser();
-  if (!user) return { message: "Not authenticated" };
-
-  const [error] = await tryFn(() => deleteProject(projectId));
+  const [error] = await tryFn(() => deleteProjectService(projectId));
 
   if (error) return error;
 
